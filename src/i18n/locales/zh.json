@@ -1,0 +1,77 @@
+{
+  "app": {
+    "name": "BMI 计算器"
+  },
+  "nav": {
+    "home": "BMI 计算器",
+    "report": "BMI 报告"
+  },
+  "form": {
+    "height": "身高 (cm)",
+    "weight": "体重 (kg)",
+    "age": "年龄 (岁)",
+    "gender": "性别",
+    "male": "男",
+    "female": "女",
+    "phHeight": "例如 170",
+    "phWeight": "例如 65",
+    "phAge": "例如 12",
+    "requiredHeight": "请输入身高",
+    "requiredWeight": "请输入体重",
+    "requiredAge": "请输入年龄",
+    "submit": "计算 BMI"
+  },
+  "err": {
+    "height": "身高应在 50–250 cm 之间",
+    "weight": "体重应在 10–300 kg 之间",
+    "age": "年龄应在 1–120 岁之间"
+  },
+  "cat": {
+    "severeUnder": "严重偏瘦",
+    "under": "偏瘦",
+    "normal": "适中",
+    "over": "超重",
+    "obese": "肥胖",
+    "severeOver": "严重超重"
+  },
+  "report": {
+    "yourBmi": "你的 BMI",
+    "summary": "{{gender}} · {{age}} 岁 · {{height}} cm · {{weight}} kg",
+    "adultBands": "成人 BMI 分级",
+    "childBands": "BMI-for-Age 分级（{{gender}} · {{age}} 岁）",
+    "sourceAdult": "依据：BMI_chart_adult.pdf（WHO 西太平洋区）",
+    "sourceChild": "依据：BMI_chart_child.pdf（HPB，6–18 岁）",
+    "percentile": "百分位：<3rd / 3–5th / 5–90th / 90–97th / ≥97th",
+    "minorNote": "（年龄小于 6 岁，按 6 岁一行计算，仅供参考）",
+    "recalc": "重新计算",
+    "warnSevereUnder": "你的 BMI 属于「严重偏瘦」区间，可能存在营养不良风险，建议尽快咨询医生或营养师。",
+    "warnSevereOver": "你的 BMI 属于「严重超重」区间，可能与肥胖相关疾病风险升高，建议尽快咨询医生或营养师。"
+  },
+  "menu": {
+    "language": "语言 / Language",
+    "about": "关于",
+    "reset": "重置输入",
+    "copy": "复制结果",
+    "share": "分享结果",
+    "cancel": "取消"
+  },
+  "lang": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "toast": {
+    "copied": "已复制到剪贴板",
+    "copyFailed": "复制失败，请手动截图",
+    "shareUnsupported": "当前设备不支持系统分享",
+    "resetDone": "已重置"
+  },
+  "about": {
+    "title": "关于",
+    "body": "BMI 计算器 v0.1.0\n\n成人依据：香港卫生防护中心 BMI 表（WHO 西太平洋区 2000）\n儿童依据：新加坡 HPB BMI-for-Age（6–18 岁）\n\n技术栈：React + Capacitor + antd-mobile"
+  },
+  "common": {
+    "ok": "确定",
+    "cancel": "取消",
+    "close": "关闭"
+  }
+}

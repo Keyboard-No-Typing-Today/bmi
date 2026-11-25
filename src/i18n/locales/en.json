@@ -1,0 +1,77 @@
+{
+  "app": {
+    "name": "BMI Calculator"
+  },
+  "nav": {
+    "home": "BMI Calculator",
+    "report": "BMI Report"
+  },
+  "form": {
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "age": "Age (years)",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "phHeight": "e.g. 170",
+    "phWeight": "e.g. 65",
+    "phAge": "e.g. 12",
+    "requiredHeight": "Please enter your height",
+    "requiredWeight": "Please enter your weight",
+    "requiredAge": "Please enter your age",
+    "submit": "Calculate BMI"
+  },
+  "err": {
+    "height": "Height must be between 50 and 250 cm",
+    "weight": "Weight must be between 10 and 300 kg",
+    "age": "Age must be between 1 and 120"
+  },
+  "cat": {
+    "severeUnder": "Severely Underweight",
+    "under": "Underweight",
+    "normal": "Normal",
+    "over": "Overweight",
+    "obese": "Obese",
+    "severeOver": "Severely Overweight"
+  },
+  "report": {
+    "yourBmi": "Your BMI",
+    "summary": "{{gender}} · {{age}} y.o. · {{height}} cm · {{weight}} kg",
+    "adultBands": "Adult BMI categories",
+    "childBands": "BMI-for-Age bands ({{gender}}, age {{age}})",
+    "sourceAdult": "Source: BMI_chart_adult.pdf (WHO Western Pacific Region)",
+    "sourceChild": "Source: BMI_chart_child.pdf (HPB, ages 6–18)",
+    "percentile": "Percentiles: <3rd / 3–5th / 5–90th / 90–97th / ≥97th",
+    "minorNote": " (Under 6 years old, the age-6 row is used for reference only.)",
+    "recalc": "Recalculate",
+    "warnSevereUnder": "Your BMI falls in the Severely Underweight range. This may indicate a risk of malnutrition — please consult a doctor or dietitian soon.",
+    "warnSevereOver": "Your BMI falls in the Severely Overweight range. This may indicate a higher risk of obesity-related diseases — please consult a doctor or dietitian soon."
+  },
+  "menu": {
+    "language": "Language / 语言",
+    "about": "About",
+    "reset": "Reset input",
+    "copy": "Copy result",
+    "share": "Share result",
+    "cancel": "Cancel"
+  },
+  "lang": {
+    "zh": "中文",
+    "en": "English"
+  },
+  "toast": {
+    "copied": "Copied to clipboard",
+    "copyFailed": "Copy failed, please take a screenshot instead",
+    "shareUnsupported": "Sharing is not supported on this device",
+    "resetDone": "Reset done"
+  },
+  "about": {
+    "title": "About",
+    "body": "BMI Calculator v0.1.0\n\nAdults: Centre for Health Protection BMI chart (WHO Western Pacific Region 2000)\nChildren: HPB BMI-for-Age (ages 6–18)\n\nBuilt with React + Capacitor + antd-mobile"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "close": "Close"
+  }
+}
