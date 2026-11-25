@@ -2,6 +2,7 @@ import { NavBar, Button, NoticeBar } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
 import { calcBMI, classify } from '../../utils/rules';
 import { BOYS, GIRLS } from '../../utils/chartChild';
+import MenuButton from '../../components/MenuButton';
 
 // 分类 → 样式信息；文案统一走 i18n 的 cat.* 命名空间
 const META = {
@@ -35,7 +36,7 @@ function childBands(row) {
   ];
 }
 
-export default function ReportScreen({ data, onBack }) {
+export default function ReportScreen({ data, onBack, onMenu }) {
   const { t } = useTranslation();
   const { height, weight, age, gender } = data;
 
@@ -52,7 +53,9 @@ export default function ReportScreen({ data, onBack }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8', paddingBottom: 24 }}>
-      <NavBar onBack={onBack}>{t('nav.report')}</NavBar>
+      <NavBar onBack={onBack} right={<MenuButton onClick={onMenu} />}>
+        {t('nav.report')}
+      </NavBar>
 
       {/* 主结果卡 */}
       <div style={{ background: '#fff', margin: 12, borderRadius: 12, padding: '28px 16px', textAlign: 'center' }}>

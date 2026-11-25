@@ -1,7 +1,8 @@
 import { Form, Input, Selector, Button, NavBar, Toast } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
+import MenuButton from '../../components/MenuButton';
 
-export default function HomeScreen({ onSubmit }) {
+export default function HomeScreen({ onSubmit, onMenu }) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
 
@@ -15,7 +16,9 @@ export default function HomeScreen({ onSubmit }) {
 
   return (
     <>
-      <NavBar backIcon={null}>{t('nav.home')}</NavBar>
+      <NavBar backIcon={null} right={<MenuButton onClick={onMenu} />}>
+        {t('nav.home')}
+      </NavBar>
       <Form form={form} layout="vertical" onFinish={handleFinish}
         initialValues={{ gender: 'male' }}
         footer={<Button block type="submit" color="primary" size="large">{t('form.submit')}</Button>}>
