@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "BMI Calculator"
+    "name": "BMI Calculator",
+    "tagline": "Enter your height, weight, age and gender to see which category you fall into."
   },
   "nav": {
     "home": "BMI Calculator",

@@ -108,98 +108,101 @@ export default function ReportScreen({ data, onBack, onMenu }) {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8', paddingBottom: 24 }}>
+    <div className="page">
       <NavBar onBack={onBack} right={<MenuButton onClick={onMenu} />}>
         {t('nav.report')}
       </NavBar>
 
-      {/* 主结果卡：长按可呼出 Context Menu */}
-      <div
-        onTouchStart={startPress}
-        onTouchMove={cancelPress}
-        onTouchEnd={cancelPress}
-        onTouchCancel={cancelPress}
-        onMouseDown={startPress}
-        onMouseUp={cancelPress}
-        onMouseLeave={cancelPress}
-        onContextMenu={(e) => e.preventDefault()}
-        style={{
-          background: '#fff', margin: 12, borderRadius: 12, padding: '28px 16px',
-          textAlign: 'center',
-          userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none',
-        }}
-      >
-        <div style={{ fontSize: 13, color: '#8f8f8f', marginBottom: 6 }}>{t('report.yourBmi')}</div>
-        <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.1, color: meta.color }}>
-          {bmi.toFixed(2)}
-        </div>
-        <div
-          style={{
-            display: 'inline-block', marginTop: 12, padding: '4px 14px', borderRadius: 999,
-            background: meta.color, color: '#fff', fontSize: 15, fontWeight: 600,
-          }}
-        >
-          {t(`cat.${cat}`)}
-        </div>
-        <div style={{ marginTop: 12, fontSize: 13, color: '#8f8f8f' }}>
-          {t('report.summary', { gender: genderLabel, age, height, weight })}
-        </div>
-        <div style={{ marginTop: 8, fontSize: 11, color: '#c0c4cc' }}>
-          {t('report.hintLongPress')}
-        </div>
-      </div>
-
-      {/* 分级色带：成人 4 格 / 儿童 5 格 */}
-      <div style={{ background: '#fff', margin: 12, borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
-          {isChild
-            ? t('report.childBands', { gender: genderLabel, age: displayAge })
-            : t('report.adultBands')}
-        </div>
-        <div style={{ fontSize: 12, color: '#8f8f8f', marginBottom: 12 }}>
-          {isChild ? t('report.sourceChild') : t('report.sourceAdult')}
-        </div>
-
-        <div style={{ display: 'flex', gap: 6 }}>
-          {bands.map((b) => {
-            const active = b.cat === activeCat;
-            return (
-              <div
-                key={b.cat}
-                style={{
-                  flex: 1, borderRadius: 8, padding: '10px 4px', textAlign: 'center',
-                  background: b.color, color: '#fff', opacity: active ? 1 : 0.35,
-                  outline: active ? `3px solid ${b.color}` : 'none',
-                  outlineOffset: 2,
-                }}
-              >
-                <div style={{ fontSize: 11, fontWeight: 600 }}>{t(`cat.${b.cat}`)}</div>
-                <div style={{ fontSize: 10, marginTop: 2 }}>{b.label}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        {isChild && (
-          <div style={{ fontSize: 11, color: '#8f8f8f', marginTop: 10 }}>
-            {t('report.percentile')}
-            {age < 6 && t('report.minorNote')}
+      {/* 横屏时 report-wrap 变成左右两栏；竖屏时自然上下堆叠 */}
+      <div className="report-wrap">
+        <div className="report-main">
+          {/* 主结果卡：长按可呼出 Context Menu */}
+          <div
+            className="card result-card"
+            onTouchStart={startPress}
+            onTouchMove={cancelPress}
+            onTouchEnd={cancelPress}
+            onTouchCancel={cancelPress}
+            onMouseDown={startPress}
+            onMouseUp={cancelPress}
+            onMouseLeave={cancelPress}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            <div style={{ fontSize: 13, color: '#8f8f8f', marginBottom: 6 }}>{t('report.yourBmi')}</div>
+            <div className="bmi-number" style={{ color: meta.color }}>
+              {bmi.toFixed(2)}
+            </div>
+            <div
+              style={{
+                display: 'inline-block', marginTop: 12, padding: '4px 14px', borderRadius: 999,
+                background: meta.color, color: '#fff', fontSize: 15, fontWeight: 600,
+              }}
+            >
+              {t(`cat.${cat}`)}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 13, color: '#8f8f8f' }}>
+              {t('report.summary', { gender: genderLabel, age, height, weight })}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 11, color: '#c0c4cc' }}>
+              {t('report.hintLongPress')}
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* 警告区：只有 severe 两档才渲染 */}
-      {meta.warn && (
-        <div style={{ margin: 12 }}>
-          <NoticeBar color="alert" style={{ borderRadius: 12, fontSize: 14 }}>
-            {cat === 'severeUnder' ? t('report.warnSevereUnder') : t('report.warnSevereOver')}
-          </NoticeBar>
         </div>
-      )}
 
-      {/* 重新计算 */}
-      <div style={{ margin: 12 }}>
-        <Button block color="primary" size="large" onClick={onBack}>{t('report.recalc')}</Button>
+        <div className="report-side">
+          {/* 分级色带：成人 4 格 / 儿童 5 格 */}
+          <div className="card bands-card">
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
+              {isChild
+                ? t('report.childBands', { gender: genderLabel, age: displayAge })
+                : t('report.adultBands')}
+            </div>
+            <div style={{ fontSize: 12, color: '#8f8f8f', marginBottom: 12 }}>
+              {isChild ? t('report.sourceChild') : t('report.sourceAdult')}
+            </div>
+
+            <div style={{ display: 'flex', gap: 6 }}>
+              {bands.map((b) => {
+                const active = b.cat === activeCat;
+                return (
+                  <div
+                    key={b.cat}
+                    style={{
+                      flex: 1, borderRadius: 8, padding: '10px 4px', textAlign: 'center',
+                      background: b.color, color: '#fff', opacity: active ? 1 : 0.35,
+                      outline: active ? `3px solid ${b.color}` : 'none',
+                      outlineOffset: 2,
+                    }}
+                  >
+                    <div style={{ fontSize: 11, fontWeight: 600 }}>{t(`cat.${b.cat}`)}</div>
+                    <div style={{ fontSize: 10, marginTop: 2 }}>{b.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {isChild && (
+              <div style={{ fontSize: 11, color: '#8f8f8f', marginTop: 10 }}>
+                {t('report.percentile')}
+                {age < 6 && t('report.minorNote')}
+              </div>
+            )}
+          </div>
+
+          {/* 警告区：只有 severe 两档才渲染 */}
+          {meta.warn && (
+            <div className="warn-wrap">
+              <NoticeBar color="alert" style={{ borderRadius: 12, fontSize: 14 }}>
+                {cat === 'severeUnder' ? t('report.warnSevereUnder') : t('report.warnSevereOver')}
+              </NoticeBar>
+            </div>
+          )}
+
+          {/* 重新计算 */}
+          <div className="recalc">
+            <Button block color="primary" size="large" onClick={onBack}>{t('report.recalc')}</Button>
+          </div>
+        </div>
       </div>
 
       {/* Context Menu：对应 Android 的 registerForContextMenu + onCreateContextMenu */}
