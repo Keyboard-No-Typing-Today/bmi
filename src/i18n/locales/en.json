@@ -45,7 +45,8 @@
     "minorNote": " (Under 6 years old, the age-6 row is used for reference only.)",
     "recalc": "Recalculate",
     "warnSevereUnder": "Your BMI falls in the Severely Underweight range. This may indicate a risk of malnutrition — please consult a doctor or dietitian soon.",
-    "warnSevereOver": "Your BMI falls in the Severely Overweight range. This may indicate a higher risk of obesity-related diseases — please consult a doctor or dietitian soon."
+    "warnSevereOver": "Your BMI falls in the Severely Overweight range. This may indicate a higher risk of obesity-related diseases — please consult a doctor or dietitian soon.",
+    "hintLongPress": "Press and hold for copy / share"
   },
   "menu": {
     "language": "Language / 语言",

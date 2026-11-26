@@ -1,4 +1,5 @@
-import { NavBar, Button, NoticeBar } from 'antd-mobile';
+import { useRef, useState } from 'react';
+import { NavBar, Button, NoticeBar, Toast } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
 import { calcBMI, classify } from '../../utils/rules';
 import { BOYS, GIRLS } from '../../utils/chartChild';
@@ -36,6 +37,10 @@ function childBands(row) {
   ];
 }
 
+const MENU_W = 168;   // 菜单大致宽高，用来做边界夹取
+const MENU_H = 150;
+const LONG_PRESS_MS = 600;
+
 export default function ReportScreen({ data, onBack, onMenu }) {
   const { t } = useTranslation();
   const { height, weight, age, gender } = data;
@@ -51,14 +56,79 @@ export default function ReportScreen({ data, onBack, onMenu }) {
   const bands = isChild ? childBands(row) : ADULT_BANDS;
   const activeCat = isChild ? cat : (ADULT_ACTIVE[cat] || cat);
 
+  // ---- Context Menu（长按结果卡） ----
+  const [ctx, setCtx] = useState({ open: false, x: 0, y: 0 });
+  const pressTimer = useRef(null);
+
+  const startPress = (e) => {
+    const p = e.touches ? e.touches[0] : e;
+    clearTimeout(pressTimer.current);
+    pressTimer.current = setTimeout(() => {
+      setCtx({
+        open: true,
+        x: Math.max(8, Math.min(p.clientX - 24, window.innerWidth - MENU_W - 8)),
+        y: Math.max(8, Math.min(p.clientY - 24, window.innerHeight - MENU_H - 8)),
+      });
+    }, LONG_PRESS_MS);
+  };
+
+  // 手指一动就取消：用户在滚动页面，不该弹菜单
+  const cancelPress = () => clearTimeout(pressTimer.current);
+  const closeCtx = () => setCtx((c) => ({ ...c, open: false }));
+
+  const resultText =
+    t('report.yourBmi') + ': ' + bmi.toFixed(2) + ' (' + t('cat.' + cat) + ')' +
+    ' | ' + t('report.summary', { gender: genderLabel, age, height, weight });
+
+  const copyResult = async () => {
+    try {
+      await navigator.clipboard.writeText(resultText);
+      Toast.show({ icon: 'success', content: t('toast.copied') });
+    } catch {
+      Toast.show({ icon: 'fail', content: t('toast.copyFailed') });
+    }
+  };
+
+  const shareResult = async () => {
+    if (!navigator.share) {
+      Toast.show({ content: t('toast.shareUnsupported') });
+      return;
+    }
+    try {
+      await navigator.share({ title: t('nav.report'), text: resultText });
+    } catch {
+      /* 用户取消分享，不提示 */
+    }
+  };
+
+  const menuItems = [
+    { key: 'copy', label: t('menu.copy'), onClick: copyResult },
+    { key: 'share', label: t('menu.share'), onClick: shareResult },
+    { key: 'reset', label: t('menu.reset'), danger: true, onClick: onBack },
+  ];
+
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8', paddingBottom: 24 }}>
       <NavBar onBack={onBack} right={<MenuButton onClick={onMenu} />}>
         {t('nav.report')}
       </NavBar>
 
-      {/* 主结果卡 */}
-      <div style={{ background: '#fff', margin: 12, borderRadius: 12, padding: '28px 16px', textAlign: 'center' }}>
+      {/* 主结果卡：长按可呼出 Context Menu */}
+      <div
+        onTouchStart={startPress}
+        onTouchMove={cancelPress}
+        onTouchEnd={cancelPress}
+        onTouchCancel={cancelPress}
+        onMouseDown={startPress}
+        onMouseUp={cancelPress}
+        onMouseLeave={cancelPress}
+        onContextMenu={(e) => e.preventDefault()}
+        style={{
+          background: '#fff', margin: 12, borderRadius: 12, padding: '28px 16px',
+          textAlign: 'center',
+          userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none',
+        }}
+      >
         <div style={{ fontSize: 13, color: '#8f8f8f', marginBottom: 6 }}>{t('report.yourBmi')}</div>
         <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.1, color: meta.color }}>
           {bmi.toFixed(2)}
@@ -73,6 +143,9 @@ export default function ReportScreen({ data, onBack, onMenu }) {
         </div>
         <div style={{ marginTop: 12, fontSize: 13, color: '#8f8f8f' }}>
           {t('report.summary', { gender: genderLabel, age, height, weight })}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 11, color: '#c0c4cc' }}>
+          {t('report.hintLongPress')}
         </div>
       </div>
 
@@ -128,6 +201,35 @@ export default function ReportScreen({ data, onBack, onMenu }) {
       <div style={{ margin: 12 }}>
         <Button block color="primary" size="large" onClick={onBack}>{t('report.recalc')}</Button>
       </div>
+
+      {/* Context Menu：对应 Android 的 registerForContextMenu + onCreateContextMenu */}
+      {ctx.open && (
+        <>
+          <div onClick={closeCtx} style={{ position: 'fixed', inset: 0, zIndex: 900 }} />
+          <div
+            style={{
+              position: 'fixed', left: ctx.x, top: ctx.y, zIndex: 901, minWidth: 152,
+              background: '#fff', borderRadius: 12, overflow: 'hidden',
+              boxShadow: '0 8px 28px rgba(0, 0, 0, 0.18)',
+            }}
+          >
+            {menuItems.map((item, i) => (
+              <div
+                key={item.key}
+                onClick={() => { closeCtx(); item.onClick && item.onClick(); }}
+                style={{
+                  padding: '12px 18px', fontSize: 15,
+                  color: item.danger ? '#ff3141' : '#1f2328',
+                  borderBottom: i < menuItems.length - 1 ? '1px solid #f0f0f0' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {item.label}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

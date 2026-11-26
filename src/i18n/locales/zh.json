@@ -45,7 +45,8 @@
     "minorNote": "（年龄小于 6 岁，按 6 岁一行计算，仅供参考）",
     "recalc": "重新计算",
     "warnSevereUnder": "你的 BMI 属于「严重偏瘦」区间，可能存在营养不良风险，建议尽快咨询医生或营养师。",
-    "warnSevereOver": "你的 BMI 属于「严重超重」区间，可能与肥胖相关疾病风险升高，建议尽快咨询医生或营养师。"
+    "warnSevereOver": "你的 BMI 属于「严重超重」区间，可能与肥胖相关疾病风险升高，建议尽快咨询医生或营养师。",
+    "hintLongPress": "长按结果可复制或分享"
   },
   "menu": {
     "language": "语言 / Language",
