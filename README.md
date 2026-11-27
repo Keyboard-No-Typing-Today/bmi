@@ -366,3 +366,43 @@ Capacitor 命令必须在**项目根目录**（`capacitor.config.ts` 所在目�
   男女分开，按百分位分 5 档（<3rd、3rd–<5th、5th–<90th、90th–<97th、≥97th）。
 * 成人表本身没有定义"严重"档；本项目采用 **< 16** 和 **≥ 30**（WHO 重度消瘦 / 肥胖 II 级）
   作为警告状态的阈值，第 12 节即为此假设的说明。
+
+---
+
+## 13. LLM 健康建议（Task 3）
+
+结果页的「AI 健康建议」卡片会把 **BMI、年龄、性别、身高体重、分级**发给 DeepSeek，
+返回 3 句中文/英文建议。语言跟随 App 当前语言。
+
+### 13.1 需要的环境变量
+
+在项目根目录建 `.env.local`（**已被 git 忽略，不要提交**）：
+
+```ini
+REACT_APP_LLM_BASE_URL=https://api.deepseek.com
+REACT_APP_LLM_MODEL=deepseek-chat
+REACT_APP_LLM_API_KEY=sk-你的密钥
+```
+
+改完要**重启 dev server**，CRA 只在启动时读取。
+
+### 13.2 为什么有两个"代理"
+
+| 环境 | 走什么 | 文件 |
+| --- | --- | --- |
+| 浏览器 `npm start` | 本地代理 `/llm/*` → DeepSeek | `src/setupProxy.js` |
+| 安卓 APK | 原生 HTTP，不经浏览器 | `capacitor.config.ts` 的 `CapacitorHttp.enabled` |
+
+两个都配好，才能做到「浏览器能跑，手机也能跑」。
+
+### 13.3 安全提醒
+
+`REACT_APP_*` 变量会被 CRA **内联进 JS 包**，所以打出来的 APK 里含有 API Key，
+反编译可提取。作业演示没问题；若要公开分享 APK，请先删除 key 重新打包，
+或改造成「App 内输入 key」的方案。
+
+### 13.4 相关文件
+
+* `src/services/llm.js` —— 拼 prompt、发请求、超时、错误分类、语言校验与重试
+* `src/setupProxy.js` —— 开发期代理
+* `src/views/Report/Report.jsx` —— AI 卡片与按钮

@@ -354,3 +354,43 @@ not from inside `android/`.
   (<3rd, 3rd–<5th, 5th–<90th, 90th–<97th, >=97th).
 * Adult "severe" bands are not defined by the HK chart; this project uses **<16** and **>=30**
   (WHO severe thinness / obesity class II) and labels them as warning states.
+---
+
+## 13. LLM health advice (Task 3)
+
+The **AI Health Advice** card on the Report screen sends **BMI, age, gender, height, weight and
+category** to DeepSeek and shows a short piece of advice in the current app language.
+
+### 13.1 Environment variables
+
+Create `.env.local` in the project root (**git-ignored, never commit it**):
+
+```ini
+REACT_APP_LLM_BASE_URL=https://api.deepseek.com
+REACT_APP_LLM_MODEL=deepseek-chat
+REACT_APP_LLM_API_KEY=sk-your-key
+```
+
+Restart the dev server after changing it — CRA reads env vars at startup only.
+
+### 13.2 Why there are two "proxies"
+
+| Environment | Path | File |
+| --- | --- | --- |
+| Browser (`npm start`) | local proxy `/llm/*` → DeepSeek | `src/setupProxy.js` |
+| Android APK | native HTTP, bypassing the browser | `CapacitorHttp.enabled` in `capacitor.config.ts` |
+
+Both are required: the browser needs a same-origin proxy for CORS, while the APK needs native
+HTTP because the WebView has no proxy.
+
+### 13.3 Security note
+
+`REACT_APP_*` variables are **inlined into the JS bundle**, so the API key ships inside the APK
+and can be extracted by decompilation. Fine for a lab demo; if you share the APK publicly,
+rebuild without the key or switch to an in-app key input.
+
+### 13.4 Files
+
+* `src/services/llm.js` — prompt building, request, timeout, error codes, language check
+* `src/setupProxy.js` — development proxy
+* `src/views/Report/Report.jsx` — AI card and button
