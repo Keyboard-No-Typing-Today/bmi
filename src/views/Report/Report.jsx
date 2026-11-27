@@ -5,6 +5,7 @@ import { calcBMI, classify } from '../../utils/rules';
 import { BOYS, GIRLS } from '../../utils/chartChild';
 import MenuButton from '../../components/MenuButton';
 import { fetchAdvice } from '../../services/llm';
+import { saveRecord } from '../../storage/history';
 
 // 分类 → 样式信息；文案统一走 i18n 的 cat.* 命名空间
 const META = {
@@ -42,7 +43,7 @@ const MENU_W = 168;   // 菜单大致宽高，用来做边界夹取
 const MENU_H = 150;
 const LONG_PRESS_MS = 600;
 
-export default function ReportScreen({ data, onBack, onMenu }) {
+export default function ReportScreen({ data, onBack, onMenu, onOpenHistory }) {
   const { t, i18n } = useTranslation();
   const { height, weight, age, gender } = data;
 
@@ -56,6 +57,13 @@ export default function ReportScreen({ data, onBack, onMenu }) {
   const row = isChild ? (gender === 'male' ? BOYS : GIRLS)[displayAge] : null;
   const bands = isChild ? childBands(row) : ADULT_BANDS;
   const activeCat = isChild ? cat : (ADULT_ACTIVE[cat] || cat);
+
+  // 进入结果页就把这次结果写进 SQLite（同一天会被覆盖成最新一条）
+  useEffect(() => {
+    saveRecord({ bmi, weight, height, age, gender, category: cat }).catch(() => {});
+    // 只在挂载时写一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- AI 健康建议（点击按钮才请求，省流量也省 token） ----
   const [advice, setAdvice] = useState({ loading: false, text: '', error: '' });
@@ -252,9 +260,12 @@ export default function ReportScreen({ data, onBack, onMenu }) {
             </div>
           )}
 
-          {/* 重新计算 */}
+          {/* 重新计算 + 查看趋势 */}
           <div className="recalc">
             <Button block color="primary" size="large" onClick={onBack}>{t('report.recalc')}</Button>
+          </div>
+          <div className="recalc">
+            <Button block fill="outline" size="large" onClick={onOpenHistory}>{t('report.viewTrend')}</Button>
           </div>
         </div>
       </div>

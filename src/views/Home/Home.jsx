@@ -1,16 +1,26 @@
+import { useEffect } from 'react';
 import { Form, Input, Selector, Button, NavBar, Toast } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
 import MenuButton from '../../components/MenuButton';
+import { loadProfile, saveProfile } from '../../storage/profile';
 
 export default function HomeScreen({ onSubmit, onMenu }) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
+
+  // 挂载时把上次填过的身高/年龄/性别填回去
+  // 注意必须用 setFieldsValue：initialValues 只在挂载那一刻生效
+  useEffect(() => {
+    const p = loadProfile();
+    if (p) form.setFieldsValue(p);
+  }, [form]);
 
   const handleFinish = (v) => {
     const height = Number(v.height), weight = Number(v.weight), age = Number(v.age);
     if (!(height >= 50 && height <= 250)) return Toast.show({ content: t('err.height') });
     if (!(weight >= 10 && weight <= 300)) return Toast.show({ content: t('err.weight') });
     if (!(age >= 1 && age <= 120)) return Toast.show({ content: t('err.age') });
+    saveProfile({ height, age, gender: v.gender });
     onSubmit({ height, weight, age, gender: v.gender });
   };
 

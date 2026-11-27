@@ -47,7 +47,8 @@
     "recalc": "重新计算",
     "warnSevereUnder": "你的 BMI 属于「严重偏瘦」区间，可能存在营养不良风险，建议尽快咨询医生或营养师。",
     "warnSevereOver": "你的 BMI 属于「严重超重」区间，可能与肥胖相关疾病风险升高，建议尽快咨询医生或营养师。",
-    "hintLongPress": "长按结果可复制或分享"
+    "hintLongPress": "长按结果可复制或分享",
+    "viewTrend": "查看趋势"
   },
   "menu": {
     "language": "语言 / Language",
@@ -55,7 +56,8 @@
     "reset": "重置输入",
     "copy": "复制结果",
     "share": "分享结果",
-    "cancel": "取消"
+    "cancel": "取消",
+    "history": "历史趋势"
   },
   "lang": {
     "zh": "中文",
@@ -84,5 +86,13 @@
     "error": "获取建议失败，请检查网络后重试",
     "nokey": "未配置 API Key，无法获取建议",
     "disclaimer": "以上内容由 AI 生成，仅供参考，不构成医疗建议。"
+  },
+  "history": {
+    "title": "历史趋势",
+    "chartTitle": "BMI 变化",
+    "listTitle": "历史记录",
+    "empty": "还没有记录，先去算一次吧",
+    "loading": "加载中…",
+    "bmi": "BMI"
   }
 }

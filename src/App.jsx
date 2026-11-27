@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { LANGS } from './i18n';
 import HomeScreen from './views/Home/Home';
 import ReportScreen from './views/Report/Report';
+import HistoryScreen from './views/History/History';
 
 export default function App() {
   // useTranslation 会在语言切换时触发重渲染，ConfigProvider 的 locale 也会跟着变
@@ -46,6 +47,11 @@ export default function App() {
       return;
     }
 
+    if (action.key === 'history') {
+      setScreen('history');
+      return;
+    }
+
     if (action.key === 'reset') {
       setData(null);
       setHomeKey((k) => k + 1);
@@ -60,7 +66,7 @@ export default function App() {
 
   return (
     <ConfigProvider locale={isZh ? zhCN : enUS}>
-      {screen === 'home' ? (
+      {screen === 'home' && (
         <HomeScreen
           key={homeKey}
           onMenu={() => setMenuOpen(true)}
@@ -69,11 +75,21 @@ export default function App() {
             setScreen('report');
           }}
         />
-      ) : (
+      )}
+
+      {screen === 'report' && (
         <ReportScreen
           data={data}
           onMenu={() => setMenuOpen(true)}
           onBack={() => setScreen('home')}
+          onOpenHistory={() => setScreen('history')}
+        />
+      )}
+
+      {screen === 'history' && (
+        <HistoryScreen
+          onMenu={() => setMenuOpen(true)}
+          onBack={() => setScreen(data ? 'report' : 'home')}
         />
       )}
 
@@ -82,6 +98,7 @@ export default function App() {
         visible={menuOpen}
         actions={[
           { key: 'lang', text: t('menu.language') },
+          { key: 'history', text: t('menu.history') },
           { key: 'about', text: t('menu.about') },
           { key: 'reset', text: t('menu.reset'), danger: true },
         ]}
