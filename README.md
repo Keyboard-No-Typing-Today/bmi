@@ -119,6 +119,9 @@ cd android
 
 ---
 
+> 懒人做法：直接运行 `.\scripts\setup-env.ps1`，脚本会把上面 3.1–3.4 的检查全做一遍，缺什么自动补。
+> 详见第 14 节。
+
 ## 4. 安装项目依赖
 
 ```powershell
@@ -270,7 +273,8 @@ cd android
 | 构建 + 安装 + 启动 | `npx cap run android` |
 | 热更新调试 | `npx cap run android -l` |
 | 用 Android Studio 打开原生工程 | `npx cap open android` |
-| 环境自检 | `npx cap doctor` |
+| 环境自检（Capacitor） | `npx cap doctor` |
+| **本机环境体检 + 自动修复** | `.\scripts\setup-env.ps1`（详见第 14 节） |
 | 打 Debug APK | `cd android; .\gradlew.bat assembleDebug` |
 | 打 Release APK / AAB | `cd android; .\gradlew.bat assembleRelease` / `bundleRelease` |
 | 停止 Gradle 守护进程 | `cd android; .\gradlew.bat --stop` |
@@ -406,3 +410,97 @@ REACT_APP_LLM_API_KEY=sk-你的密钥
 * `src/services/llm.js` —— 拼 prompt、发请求、超时、错误分类、语言校验与重试
 * `src/setupProxy.js` —— 开发期代理
 * `src/views/Report/Report.jsx` —— AI 卡片与按钮
+
+---
+
+## 14. 环境自检脚本（`scripts/setup-env.ps1`）
+
+装依赖之前、或者"明明昨天还能跑今天就不行"的时候，先跑这个脚本。
+
+**它不需要 Node 已安装、也不需要项目能编译** —— 用 Windows 自带的 PowerShell 就能运行，
+检查的是**整台机器**：Node / npm / JDK / JAVA_HOME / PATH / Android SDK / adb / Git / 项目依赖。
+
+### 14.1 怎么运行
+
+在项目根目录打开 PowerShell，直接跑：
+
+```powershell
+cd C:\Users\Sytus\Desktop\BMI\bmi
+.\scripts\setup-env.ps1
+```
+
+也可以用 npm 包装（等价，好处是自带 `-ExecutionPolicy Bypass`）：
+
+```powershell
+npm run setup            # 体检 + 自动修复
+npm run setup:build      # 体检 + 再跑一次 npm run build
+npm run setup -- -NoFix  # 只看不改
+```
+
+### 14.2 参数
+
+| 参数 | 作用 |
+| --- | --- |
+| （不加） | 体检 + 自动修复缺失项 |
+| `-NoFix` | 只报告，不修改任何东西 |
+| `-Build` | 体检结束后额外执行 `npm run build` 做冒烟测试 |
+
+| 想看帮助 | `Get-Help .\scripts\setup-env.ps1 -Examples` |
+
+### 14.3 输出怎么读
+
+```
+[OK  ] Node.js: v22.21.1                       正常
+[FIX ] .npmrc: 已创建 legacy-peer-deps=true     脚本动手修了
+[WARN] PATH 里有旧 Java: D:\jdk-18.0.2.1\bin   不阻塞，但建议处理
+[FAIL] JDK 21: 未找到                           阻塞，必须处理
+        -> winget install EclipseAdoptium.Temurin.21.JDK   具体修法
+```
+
+结尾会给结论和**退出码**：`0` = 能跑，`1` = 有阻塞问题。所以可以挂在钩子里：
+
+```powershell
+npm run setup -- -NoFix
+if ($LASTEXITCODE -ne 0) { Write-Host '环境有问题，先修' }
+```
+
+### 14.4 它会改什么、不会改什么
+
+| 动作 | 说明 |
+| --- | --- |
+| 写用户级 `JAVA_HOME` / `ANDROID_HOME` / `ANDROID_SDK_ROOT` | 值不对才写 |
+| 把 `%JAVA_HOME%\bin` 加到用户 PATH 最前 | 已存在就不重复加 |
+| 创建 `.npmrc` / `.env.local` 模板 / 装 node_modules | 已存在不覆盖（不会碰你的 API Key） |
+| `winget install` Node / JDK | 仅在真的缺失时；执行前会打印提示 |
+| 安装 Android SDK 组件 | 有 `sdkmanager` 才做 |
+| 修改项目源码 / 改系统级 PATH / 装 Android Studio | **不会** |
+
+只想看结果不动手，就加 `-NoFix`。
+
+### 14.5 常见问题
+
+**提示"无法加载文件，因为在此系统上禁止运行脚本"**
+
+你机器的执行策略是 `RemoteSigned`，本地脚本本来就能跑；只有**从 zip 解压**出来的文件会带"网络标记"被拦：
+
+```powershell
+Unblock-File .\scripts\setup-env.ps1
+```
+
+或者临时绕过：`powershell -ExecutionPolicy Bypass -File .\scripts\setup-env.ps1`
+
+**双击 .ps1 没反应** —— 默认行为是用记事本打开，不会执行。请在已打开的终端里运行。
+
+**右键"使用 PowerShell 运行"跑完窗口就关了** —— 看不到结果。用终端运行。
+
+**脚本能改系统级 PATH 吗** —— 不能，需要管理员。它只会提示"系统级 PATH 里还有旧 Java"。
+
+### 14.6 已知限制
+
+* `winget install` 分支未在"干净机器"上实测（开发机已有 Node/JDK）
+* 真正执行 `npm install` 的分支未实测（会下载数百 MB）
+* 系统级 PATH 的旧 Java 只能提示，不能自动清理
+
+### 14.7 相关文件
+
+* `scripts/setup-env.ps1` —— 脚本本体（**必须保存为 UTF-8 with BOM**，否则 PowerShell 5.1 会把中文读成乱码并报语法错误）

@@ -122,6 +122,9 @@ cd android
 
 ---
 
+> Shortcut: run `.\scripts\setup-env.ps1` — it performs all checks from 3.1–3.4 and fixes what it can.
+> See section 14.
+
 ## 4. Install project dependencies
 
 ```powershell
@@ -271,6 +274,7 @@ Bump `versionCode` / `versionName` in `android/app/build.gradle` for every store
 | Live reload | `npx cap run android -l` |
 | Open native project in Android Studio | `npx cap open android` |
 | Diagnose environment | `npx cap doctor` |
+| **Machine health check + auto-fix** | `.\scripts\setup-env.ps1` (see section 14) |
 | Debug APK | `cd android; .\gradlew.bat assembleDebug` |
 | Release APK / AAB | `cd android; .\gradlew.bat assembleRelease` / `bundleRelease` |
 | Stop Gradle daemons | `cd android; .\gradlew.bat --stop` |
@@ -394,3 +398,89 @@ rebuild without the key or switch to an in-app key input.
 * `src/services/llm.js` — prompt building, request, timeout, error codes, language check
 * `src/setupProxy.js` — development proxy
 * `src/views/Report/Report.jsx` — AI card and button
+
+---
+
+## 14. Environment self-check script (`scripts/setup-env.ps1`)
+
+Run this before installing dependencies, or whenever "it worked yesterday but not today".
+
+**It does not need Node installed and does not need the project to build** — plain Windows
+PowerShell is enough. It inspects the **whole machine**: Node / npm / JDK / JAVA_HOME / PATH /
+Android SDK / adb / Git / project dependencies.
+
+### 14.1 Run it
+
+From the project root:
+
+```powershell
+cd C:\Users\Sytus\Desktop\BMI\bmi
+.\scripts\setup-env.ps1
+```
+
+Or through npm (equivalent, but adds `-ExecutionPolicy Bypass`):
+
+```powershell
+npm run setup            # check + auto-fix
+npm run setup:build      # check + run npm run build
+npm run setup -- -NoFix  # report only
+```
+
+### 14.2 Options
+
+| Flag | Effect |
+| --- | --- |
+| (none) | Check and auto-fix what is missing |
+| `-NoFix` | Report only, change nothing |
+| `-Build` | Also run `npm run build` as a smoke test |
+
+Help: `Get-Help .\scripts\setup-env.ps1 -Examples`
+
+### 14.3 Reading the output
+
+```
+[OK  ] Node.js: v22.21.1                       fine
+[FIX ] .npmrc: created legacy-peer-deps        the script fixed it
+[WARN] Old Java on PATH: D:\jdk-18.0.2.1\bin   not blocking, worth fixing
+[FAIL] JDK 21: not found                       blocking
+        -> winget install EclipseAdoptium.Temurin.21.JDK
+```
+
+The last line gives a verdict and the **exit code**: `0` = usable, `1` = blocking problem.
+
+### 14.4 What it changes and what it will not touch
+
+| Action | Note |
+| --- | --- |
+| Writes user-level `JAVA_HOME` / `ANDROID_HOME` / `ANDROID_SDK_ROOT` | only when wrong |
+| Prepends `%JAVA_HOME%\bin` to user PATH | skipped if already present |
+| Creates `.npmrc` / `.env.local` template / installs node_modules | never overwrites your API key |
+| `winget install` Node / JDK | only when actually missing |
+| Installs Android SDK packages | only if `sdkmanager` exists |
+| Editing source code, system PATH, installing Android Studio | **never** |
+
+Use `-NoFix` to inspect without touching anything.
+
+### 14.5 Common issues
+
+**"cannot be loaded because running scripts is disabled"** — your policy is `RemoteSigned`, so local
+scripts normally run; files extracted from a ZIP carry a network mark. Run
+`Unblock-File .\scripts\setup-env.ps1` or use
+`powershell -ExecutionPolicy Bypass -File .\scripts\setup-env.ps1`.
+
+**Double-clicking the .ps1 does nothing** — Windows opens it in Notepad by default.
+
+**Right-click → Run with PowerShell closes the window immediately** — run it from a terminal instead.
+
+**Can it fix the system PATH?** — no, that needs administrator rights; it only warns.
+
+### 14.6 Known limitations
+
+* The `winget install` branches are untested on a truly clean machine (the dev machine already had Node/JDK).
+* The real `npm install` branch is untested (it downloads hundreds of MB).
+* Old Java entries in the **system** PATH can only be reported, not removed.
+
+### 14.7 Files
+
+* `scripts/setup-env.ps1` — the script itself (**must be saved as UTF-8 with BOM**, otherwise
+  Windows PowerShell 5.1 reads Chinese as garbled text and fails to parse it).
