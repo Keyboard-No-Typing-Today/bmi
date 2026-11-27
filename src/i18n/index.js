@@ -12,7 +12,7 @@ export const LANGS = [
 ];
 
 /** localStorage 里记住用户选择的键名 */
-export const LANG_STORAGE_KEY = 'bmi:lang';
+export const LANG_STORAGE_KEY = 'app:lang';
 
 i18n
   // 自动检测语言：先看用户上次的选择，再看系统语言

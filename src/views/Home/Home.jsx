@@ -1,64 +1,38 @@
-import { useEffect } from 'react';
-import { Form, Input, Selector, Button, NavBar, Toast } from 'antd-mobile';
+import { Button, NavBar } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
 import MenuButton from '../../components/MenuButton';
-import { loadProfile, saveProfile } from '../../storage/profile';
 
-export default function HomeScreen({ onSubmit, onMenu }) {
+// 首页入口：要加/删页面，改这个数组 + PAGES 注册表即可
+const ENTRIES = [
+  { screen: 'pageA' },
+  { screen: 'pageB' },
+  { screen: 'pageC' },
+];
+
+export default function HomeScreen({ onMenu, onNavigate }) {
   const { t } = useTranslation();
-  const [form] = Form.useForm();
-
-  // 挂载时把上次填过的身高/年龄/性别填回去
-  // 注意必须用 setFieldsValue：initialValues 只在挂载那一刻生效
-  useEffect(() => {
-    const p = loadProfile();
-    if (p) form.setFieldsValue(p);
-  }, [form]);
-
-  const handleFinish = (v) => {
-    const height = Number(v.height), weight = Number(v.weight), age = Number(v.age);
-    if (!(height >= 50 && height <= 250)) return Toast.show({ content: t('err.height') });
-    if (!(weight >= 10 && weight <= 300)) return Toast.show({ content: t('err.weight') });
-    if (!(age >= 1 && age <= 120)) return Toast.show({ content: t('err.age') });
-    saveProfile({ height, age, gender: v.gender });
-    onSubmit({ height, weight, age, gender: v.gender });
-  };
 
   return (
     <div className="page">
       <NavBar backIcon={null} right={<MenuButton onClick={onMenu} />}>
-        {t('nav.home')}
+        {t('app.name')}
       </NavBar>
 
       <div className="home-wrap">
-        <div className="home-form">
-          <Form form={form} layout="vertical" onFinish={handleFinish}
-            initialValues={{ gender: 'male' }}
-            footer={<Button block type="submit" color="primary" size="large">{t('form.submit')}</Button>}>
-            <Form.Item name="height" label={t('form.height')} rules={[{ required: true, message: t('form.requiredHeight') }]}>
-              <Input type="number" placeholder={t('form.phHeight')} />
-            </Form.Item>
-            <Form.Item name="weight" label={t('form.weight')} rules={[{ required: true, message: t('form.requiredWeight') }]}>
-              <Input type="number" placeholder={t('form.phWeight')} />
-            </Form.Item>
-            <Form.Item name="age" label={t('form.age')} rules={[{ required: true, message: t('form.requiredAge') }]}>
-              <Input type="number" placeholder={t('form.phAge')} />
-            </Form.Item>
-            <Form.Item name="gender" label={t('form.gender')}>
-              <Selector
-                options={[
-                  { label: t('form.male'), value: 'male' },
-                  { label: t('form.female'), value: 'female' },
-                ]}
-              />
-            </Form.Item>
-          </Form>
-        </div>
+        <p className="home-tagline">{t('app.tagline')}</p>
 
-        {/* 只有横屏才显示：竖屏时 CSS 里 display:none */}
-        <div className="home-side">
-          <div className="brand">BMI</div>
-          <div className="tagline">{t('app.tagline')}</div>
+        <div className="home-actions">
+          {ENTRIES.map(({ screen }) => (
+            <Button
+              key={screen}
+              block
+              color="primary"
+              size="large"
+              onClick={() => onNavigate(screen)}
+            >
+              {t(`nav.${screen}`)}
+            </Button>
+          ))}
         </div>
       </div>
     </div>

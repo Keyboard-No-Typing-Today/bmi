@@ -5,8 +5,17 @@ import enUS from 'antd-mobile/es/locales/en-US';
 import { useTranslation } from 'react-i18next';
 import { LANGS } from './i18n';
 import HomeScreen from './views/Home/Home';
-import ReportScreen from './views/Report/Report';
-import HistoryScreen from './views/History/History';
+import PageA from './views/PageA/PageA';
+import PageB from './views/PageB/PageB';
+import PageC from './views/PageC/PageC';
+
+// 页面注册表：键 = screen 名，值 = 组件。
+// 新增页面只需在这里加一行，首页按钮也走同一套 key。
+const PAGES = {
+  pageA: PageA,
+  pageB: PageB,
+  pageC: PageC,
+};
 
 export default function App() {
   // useTranslation 会在语言切换时触发重渲染，ConfigProvider 的 locale 也会跟着变
@@ -14,16 +23,10 @@ export default function App() {
   const isZh = String(i18n.language).startsWith('zh');
 
   const [screen, setScreen] = useState('home');
-  const [data, setData] = useState(null);
-
-  // Options Menu 状态
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
-  // 重置输入：改变 key 让 Home 重新挂载，表单自然清空
-  const [homeKey, setHomeKey] = useState(0);
-
-  const currentLang = (code) => String(i18n.language).startsWith(code);
+  const CurrentPage = PAGES[screen];
 
   const handleMenuAction = (action) => {
     setMenuOpen(false);
@@ -44,18 +47,6 @@ export default function App() {
           </div>
         ),
       });
-      return;
-    }
-
-    if (action.key === 'history') {
-      setScreen('history');
-      return;
-    }
-
-    if (action.key === 'reset') {
-      setData(null);
-      setHomeKey((k) => k + 1);
-      setScreen('home');
     }
   };
 
@@ -64,33 +55,14 @@ export default function App() {
     if (action.key && action.key !== i18n.language) i18n.changeLanguage(action.key);
   };
 
+  const currentLang = (code) => String(i18n.language).startsWith(code);
+
   return (
     <ConfigProvider locale={isZh ? zhCN : enUS}>
-      {screen === 'home' && (
-        <HomeScreen
-          key={homeKey}
-          onMenu={() => setMenuOpen(true)}
-          onSubmit={(d) => {
-            setData(d);
-            setScreen('report');
-          }}
-        />
-      )}
-
-      {screen === 'report' && (
-        <ReportScreen
-          data={data}
-          onMenu={() => setMenuOpen(true)}
-          onBack={() => setScreen('home')}
-          onOpenHistory={() => setScreen('history')}
-        />
-      )}
-
-      {screen === 'history' && (
-        <HistoryScreen
-          onMenu={() => setMenuOpen(true)}
-          onBack={() => setScreen(data ? 'report' : 'home')}
-        />
+      {screen === 'home' ? (
+        <HomeScreen onMenu={() => setMenuOpen(true)} onNavigate={setScreen} />
+      ) : (
+        <CurrentPage onMenu={() => setMenuOpen(true)} onBack={() => setScreen('home')} />
       )}
 
       {/* Options Menu：对应 Android ActionBar 右上角的溢出菜单 */}
@@ -98,9 +70,7 @@ export default function App() {
         visible={menuOpen}
         actions={[
           { key: 'lang', text: t('menu.language') },
-          { key: 'history', text: t('menu.history') },
           { key: 'about', text: t('menu.about') },
-          { key: 'reset', text: t('menu.reset'), danger: true },
         ]}
         onAction={handleMenuAction}
         onClose={() => setMenuOpen(false)}
