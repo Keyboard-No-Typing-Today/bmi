@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavBar, Button, NoticeBar, Toast } from 'antd-mobile';
 import { useTranslation } from 'react-i18next';
 import { calcBMI, classify } from '../../utils/rules';
 import { BOYS, GIRLS } from '../../utils/chartChild';
 import MenuButton from '../../components/MenuButton';
+import { fetchAdvice } from '../../services/llm';
 
 // 分类 → 样式信息；文案统一走 i18n 的 cat.* 命名空间
 const META = {
@@ -42,7 +43,7 @@ const MENU_H = 150;
 const LONG_PRESS_MS = 600;
 
 export default function ReportScreen({ data, onBack, onMenu }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { height, weight, age, gender } = data;
 
   const bmi = calcBMI(weight, height);
@@ -55,6 +56,34 @@ export default function ReportScreen({ data, onBack, onMenu }) {
   const row = isChild ? (gender === 'male' ? BOYS : GIRLS)[displayAge] : null;
   const bands = isChild ? childBands(row) : ADULT_BANDS;
   const activeCat = isChild ? cat : (ADULT_ACTIVE[cat] || cat);
+
+  // ---- AI 健康建议（点击按钮才请求，省流量也省 token） ----
+  const [advice, setAdvice] = useState({ loading: false, text: '', error: '' });
+  // i18n.language 可能是 'zh-CN'，统一成 'zh' / 'en'
+  const lang = String(i18n.language).startsWith('zh') ? 'zh' : 'en';
+
+  // 切换语言后旧建议是另一种语言，必须清掉
+  useEffect(() => {
+    setAdvice({ loading: false, text: '', error: '' });
+  }, [lang]);
+
+  const askAi = async () => {
+    setAdvice({ loading: true, text: '', error: '' });
+    try {
+      const text = await fetchAdvice({
+        age,
+        gender,
+        height,
+        weight,
+        bmi,
+        category: cat,
+        lang,
+      });
+      setAdvice({ loading: false, text, error: '' });
+    } catch (e) {
+      setAdvice({ loading: false, text: '', error: e.code === 'nokey' ? 'nokey' : 'error' });
+    }
+  };
 
   // ---- Context Menu（长按结果卡） ----
   const [ctx, setCtx] = useState({ open: false, x: 0, y: 0 });
@@ -187,6 +216,31 @@ export default function ReportScreen({ data, onBack, onMenu }) {
                 {age < 6 && t('report.minorNote')}
               </div>
             )}
+          </div>
+
+          {/* AI 健康建议 */}
+          <div className="card ai-card">
+            <div className="ai-title">{t('ai.title')}</div>
+
+            {advice.text && <div className="ai-text">{advice.text}</div>}
+            {advice.loading && <div className="ai-loading">{t('ai.loading')}</div>}
+            {advice.error && (
+              <div className="ai-error">
+                {advice.error === 'nokey' ? t('ai.nokey') : t('ai.error')}
+              </div>
+            )}
+
+            <Button
+              size="small"
+              color="primary"
+              fill={advice.text ? 'outline' : 'solid'}
+              loading={advice.loading}
+              onClick={askAi}
+            >
+              {advice.text ? t('ai.regenerate') : t('ai.ask')}
+            </Button>
+
+            {advice.text && <div className="ai-disclaimer">{t('ai.disclaimer')}</div>}
           </div>
 
           {/* 警告区：只有 severe 两档才渲染 */}

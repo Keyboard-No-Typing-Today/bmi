@@ -60,3 +60,11 @@
 
   .bmi-number { font-size: 40px; }
 }
+
+/* ---- AI 健康建议卡片 ---- */
+.ai-card { padding: 16px; }
+.ai-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #0b4fbe; }
+.ai-text { font-size: 14px; line-height: 1.75; color: #1f2328; white-space: pre-wrap; }
+.ai-loading { font-size: 13px; color: #8f8f8f; padding: 4px 0 10px; }
+.ai-error { font-size: 13px; color: #ff3141; padding: 4px 0 10px; }
+.ai-disclaimer { font-size: 11px; color: #b0b4ba; margin-top: 10px; line-height: 1.5; }
