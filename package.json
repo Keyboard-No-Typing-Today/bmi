@@ -25,8 +25,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "check": "node scripts/check-env.mjs",
-    "check:build": "node scripts/check-env.mjs --build"
+    "setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-env.ps1",
+    "setup:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-env.ps1 -Build"
   },
   "eslintConfig": {
     "extends": [
